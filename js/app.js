@@ -50,10 +50,12 @@ $(function () {
       method: "GET",
       success: function (response) {
         $("#main").append(
-          "<div class='container'>" +
-          "<p><a href='#'>" + response.title + "</a></p>" +
-          "<p> <span>" + response.score + "</span> point by <span class='author'>" + response.by + "</span></p>" +
-          "<a href='https://www.google.co.in/search?q=" + response.title + "' target='_blank' class='search-web'> search  web</a>" +
+          "<div class='mdl-card mdl-shadow--2dp'>" +
+            "<div class='mdl-card__supporting-text'>" +
+              "<a href='#' class='link'>" + response.title + "</a>" +
+              "<p> <span>" + response.score + "</span> point by <span class='author'>" + response.by + "</span></p>" +
+              "<a href='https://www.google.co.in/search?q=" + response.title + "' target='_blank' class='search-web'> search  web</a>" +
+            "</div>" +
           "</div>"
         );
       },

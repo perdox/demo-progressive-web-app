@@ -1,0 +1,87 @@
+a {
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.mdl-card {
+  width: 90%;
+  margin: 30px auto;
+  min-height: 80px;
+}
+
+.logo {
+  width: 40px;
+  height: 40px;
+  margin-right: 10px;
+  margin-top: -4px;
+}
+
+.mdl-card__supporting-text {
+  color: #000;
+}
+
+.mdl-card p,
+.mdl-card .link {
+  margin-bottom: 20px;
+}
+
+.mdl-card a {
+  font-size: 16px;
+  display: block;
+  color: #4F8EFA;
+}
+
+.author {
+  color: #FF6600;
+}
+
+.push-container .mdl-switch__label {
+  left: 0;
+}
+.push-container {
+  width: 90%;
+  margin: 30px auto;
+  text-align: center;
+}
+
+.btn-container button { width: 100px; }
+
+.btn-container {
+  display: block;
+  text-align: center;
+}
+
+.custom-toggle {
+  width: 100px;
+  margin-left: 40px;
+}
+
+.mdl-layout__drawer-button i {
+  padding-top: 8.5px;
+  font-size: 30px;
+}
+
+.mdl-layout__drawer .mdl-navigation__link:last-child {
+  border-bottom: 1px solid #ccc;
+}
+
+.mdl-layout__drawer .mdl-layout-title {
+  top: 9px;
+}
+
+.mdl-layout__drawer .mdl-navigation__link {
+  font-size: 15px;
+  border-top: 1px solid #ccc;
+  color: #000 !important;
+}
+
+.mdl-button.mdl-js-button[data-checked="false"] {
+  display: none;
+}
+
+.mdl-navigation__link.status {
+  text-decoration: none;
+}

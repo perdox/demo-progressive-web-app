@@ -1,7 +1,7 @@
 //If serviceWorker supports, then register it.
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker
-    .register("./serviceWorker.js") //Point to serviceWorker file
+    .register("../serviceWorker.js") //Point to serviceWorker file
     .then(function (registration) {
       console.log("Service Worker is registered", registration);
       document.getElementById("sw-register-state").textContent = "✓";
@@ -92,14 +92,8 @@ function unsubscribe() {
 
 //To change status
 function changeStatus(status) {
-  btn.dataset.checked = status;
+  pushBtn.dataset.checked = status;
   btn.checked = status;
-  if (status) {
-    $(".btn-notification").removeClass("hide");
-  }
-  else {
-    $(".btn-notification").addClass("hide");
-  }
 }
 
 //Click event for subscribe btn
