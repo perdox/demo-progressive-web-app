@@ -1,7 +1,7 @@
 'use strict';
 
 //Cache polyfil to support cacheAPI in all browsers
-importScripts('/cache-polyfill.js');
+importScripts('./cache-polyfill.js');
 
 var cacheName = 'initial-cache-v1';
 
