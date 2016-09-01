@@ -126,7 +126,7 @@ function sendPushNotification(subscription) {
       registration.pushManager.getSubscription()
       .then(function (subscription) {
         curlCommand(subscription); //To log curl command in console
-        fetch('/send_notification', {
+        fetch('https://progressive-web-application.herokuapp.com/send_notification', {
           method: 'post',
           headers: {
             'Accept': 'application/json',
