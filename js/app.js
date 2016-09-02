@@ -1,79 +1,121 @@
-'use strict';
-
-var apiKey = '428a20d6f31803d62bc3d29c0eff0937';
-// var spinnerElement = document.querySelector('.spinner');
-var headerElement = document.querySelector('header');
-var menuIconElement = document.querySelector('.header-icon');
-var menuElement = document.querySelector('.menu');
-var menuOverlayElement = document.querySelector('.menu-overlay');
-var cardElement = document.querySelector('.card');
-
-//To show/hide loading indicator
-function toggleSpinner() {
-  if (spinnerElement.classList.contains('hide')) {
-    spinnerElement.classList.remove('hide');
-  }
-  else {
-    spinnerElement.classList.add('hide');
-  }
-}
-
-//To update network status
-function updateNetworkStatus() {
-  if (navigator.onLine) {
-    headerElement.classList.remove('offline');
-  }
-  else {
-    headerElement.classList.add('offline');
-    showSnackBar('offline');
-  }
-}
-
-//To show menu
-function showMenu() {
-  menuElement.classList.add("show");
-  menuOverlayElement.classList.add("show");
-}
-
-//To hide menu
-function hideMenu() {
-  menuElement.classList.remove("show");
-  menuOverlayElement.classList.remove("show");
-}
-
-menuIconElement.addEventListener("click", showMenu, false);
-menuOverlayElement.addEventListener("click", hideMenu, false);
-
 (function () {
+  'use strict';
 
-  //If `serviceWorker` is registered and ready
-  navigator.serviceWorker.ready
-    .then(function (registration) {
-      isPushSupported(registration); //To check push is supported and enabled
-    })
+  var apiKey = '428a20d6f31803d62bc3d29c0eff0937';
+  var headerElement = document.querySelector('header');
+  var menuIconElement = document.querySelector('.header__icon');
+  var menuElement = document.querySelector('.menu');
+  var menuOverlayElement = document.querySelector('.menu__overlay');
+  var cardElement = document.querySelector('.card');
+  var addCardBtnElement = document.querySelector('.add__btn');
+  var addCardInputElement = document.querySelector('.add__input');
+
+  //To update network status
+  function updateNetworkStatus() {
+    if (navigator.onLine) {
+      headerElement.classList.remove('app__offline');
+    }
+    else {
+      headerElement.classList.add('app__offline');
+      showSnackBar('offline');
+    }
+  }
+
+  //To show menu
+  function showMenu() {
+    menuElement.classList.add("menu--show");
+    menuOverlayElement.classList.add("menu__overlay--show");
+  }
+
+  //To hide menu
+  function hideMenu() {
+    menuElement.classList.remove("menu--show");
+    menuOverlayElement.classList.remove("menu__overlay--show");
+  }
+
+  //Add weather card from user
+  function addWeatherCard() {
+    var userInput = addCardInputElement.value;
+    if (userInput === "") return;
+    addCardInputElement.value = "";
+    fetchWeatherInfo(userInput);
+  }
+
+  //Menu click event
+  menuIconElement.addEventListener("click", showMenu, false);
+  menuOverlayElement.addEventListener("click", hideMenu, false);
+
+  //Add card click event
+  addCardBtnElement.addEventListener("click", addWeatherCard, false);
 
   //Check network status
   window.addEventListener('online', updateNetworkStatus, false);
   window.addEventListener('offline', updateNetworkStatus, false);
 
+  //To register 'BG Sync' and check 'push notification' support
+  function registerBGSync() {
+    //If `serviceWorker` is registered and ready
+    navigator.serviceWorker.ready
+      .then(function (registration) {
+        //Since `bg sync` is not supported by other
+        if ('SyncManager' in window) {
+          //To check push is supported and enabled
+          isPushSupported(registration);
+
+          //Request for `notification permission`, if user granted access then register `bg sync`.
+          Notification.requestPermission(function(result) {
+            if (result !== 'granted') {
+              console.error('Denied notification permission');
+              return result;
+            }
+          })
+          .then(function () {
+            //Registering `background sync` event
+            return registration.sync.register('weatherCard'); //`weatherCard` is sync tag name
+          })
+        }
+      })
+      .catch(function (err) {
+        console.error(err);
+      });
+  }
+
   //Get weather info via `Fetch API`
-  function fetchWeatherInfo() {
-    var url = 'http://api.openweathermap.org/data/2.5/weather?q=Bangalore,India&appid=' + apiKey;
+  function fetchWeatherInfo(name) {
+    var place = name || 'Bangalore, India';
+
+    var url = 'http://api.openweathermap.org/data/2.5/weather?q=' + place + '&units=metric&appid=' + apiKey;
 
     fetch(url, { method: 'GET' })
     .then(function(resp){ return resp.json() })
       .then(function(res) {
-        console.log(res);
-        cardElement.querySelector('.card-title span').textContent = res.name + ', ' + res.sys.country;
-        cardElement.querySelector('.card-wind-info span').textContent = res.wind.speed + 'KM/H';
-        cardElement.querySelector('.card-humidity-info span').textContent = res.main.humidity + "%";
-        cardElement.querySelector('.card-max-temp span').textContent = res.main.temp_max;
-        cardElement.querySelector('.card-min-temp span').textContent = res.main.temp_min;
+        var weatherIconName = (res.weather && res.weather[0] ? res.weather[0].icon :  "");
+        var weatherImgUrl = 'http://openweathermap.org/img/w/' + weatherIconName + '.png';
+        cardElement.querySelector('.card__title').textContent = res.name + ', ' + res.sys.country;
+        cardElement.querySelector('.card__desc').textContent = res.weather && res.weather[0].main;
+        cardElement.querySelector('.card__img').setAttribute('src', weatherImgUrl);
+        cardElement.querySelector('.card__wind span').textContent = res.wind.speed + 'KM/H';
+        cardElement.querySelector('.card__humidity span').textContent = res.main.humidity + "%";
+        cardElement.querySelector('.card__temp span').textContent = res.main.temp + ' °C';
+        localStorage.removeItem("failed-request"); //Once API is success, remove if failed-request is present
       })
       .catch(function (error) {
+        //If user is offline and sent a request, store it in localStorage
+        //Once user comes online, trigger bg sync fetch from application tab to make the failed request
+        if (!navigator.onLine) {
+          localStorage.setItem("failed-request", place);
+        }
         console.error(error);
       });
   }
 
-  fetchWeatherInfo();
+  //Listen postMessage from `background sync`
+  navigator.serviceWorker.addEventListener('message', function (event) {
+    console.info('From background sync: ', event.data);
+    fetchWeatherInfo(localStorage.getItem("failed-request"));
+  });
+
+
+  fetchWeatherInfo(); //Fetch weather data
+  registerBGSync(); //Register BG Sync
 })();
